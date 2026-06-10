@@ -26,7 +26,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <NeonAuthUIProvider authClient={authClient}>
+        <NeonAuthUIProvider authClient={authClient} credentials={{ forgotPassword: true }}>
           <header className="border-b border-background bg-gray-800 backdrop-blur-2xl">
             <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 h-16">
               <Link href={"/"} className="text-bold tracking-wider text-sm">Event Planner</Link>
