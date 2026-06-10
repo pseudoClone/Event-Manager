@@ -29,14 +29,19 @@ export default async function createEventAction(formData: FormData) {
         }
         const input = parseCreateEvent(formData);
 
-        const parsedInput = await prisma.event.create({
-                data: {
-                        ownerUserId: userId,
-                        title: input.title,
-                        description: input.description,
-                        eventDate: input.eventDate ? new Date(input.eventDate) : null,
-                },
-        });
-        redirect(`/events/${parsedInput.id}`);
+        try {
+                const parsedInput = await prisma.event.create({
+                        data: {
+                                ownerUserId: userId,
+                                title: input.title,
+                                description: input.description,
+                                eventDate: input.eventDate ? new Date(input.eventDate) : null,
+                        },
+                });
+                redirect(`/events/${parsedInput.id}`);
+        } catch (err) {
+                console.log(err);
+        }
+
 }
 
