@@ -1,7 +1,14 @@
-export default function Dash() {
+import DashboardContent from "@/components/dashboard-content";
+import { getSession } from "@/lib/auth/server";
+
+export default async function Dash() {
+
+        const session = await getSession();
+        if (!session.data?.user?.id) {
+                return null; // I could also redirect to login in this case
+        }
         return (
-                <div>
-                        Dashboard
-                </div>
+                <DashboardContent userId={session.data?.user.id} />
+
         );
 }
