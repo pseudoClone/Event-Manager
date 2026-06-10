@@ -1,7 +1,21 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+
+function isServerActionPost(request: NextRequest) {
+        if (request.method !== "POST") {
+                return false;
+        }
+        const h = request.headers;
+        return Boolean(h.get("Next-Action") ?? h.get("next-action"));
+}
 
 export default async function proxy(request: NextRequest) {
         const { auth } = await import("@/lib/auth/server");
+
+        if (isServerActionPost(request)) {
+                return NextResponse.next();
+        }
+
         return auth.middleware({ loginUrl: "/auth/sign-in" })(request);
         // This function checks if the user is authenticated on EVERY request inside the app and redirect to the loginUrl if not.
 }
