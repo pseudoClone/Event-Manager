@@ -94,17 +94,6 @@ export default async function InviteRSVPContent({ token, submitted }: { token: s
                                         </form>
                                 </CardContent>
                         </Card>
-
-                        <Card>
-                                <CardHeader>
-                                        <CardTitle>
-                                                Attendees
-                                        </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-
-                                </CardContent>
-                        </Card>
                 </div>
         );
 }
