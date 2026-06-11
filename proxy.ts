@@ -11,8 +11,11 @@ function isServerActionPost(request: NextRequest) {
 
 export default async function proxy(request: NextRequest) {
         const { auth } = await import("@/lib/auth/server");
-
+        const { pathname } = request.nextUrl;
         if (isServerActionPost(request)) {
+                return NextResponse.next();
+        }
+        if (pathname === "/") {
                 return NextResponse.next();
         }
 
