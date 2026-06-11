@@ -1,7 +1,8 @@
 "use server";
 import { redirect } from "next/navigation";
 import { getSession } from "../auth/server";
-import { prisma } from "../prisma";
+import { db } from "../db";
+import { events as eventsTable } from "../db/schema";
 
 function parseCreateEvent(formData: FormData) {
         const title = String(formData.get("title") ?? "").trim();
@@ -28,20 +29,23 @@ export default async function createEventAction(formData: FormData) {
                 throw new Error("Unauthorized");
         }
         const input = parseCreateEvent(formData);
+        let newEventId: string | undefined;
 
         try {
-                const parsedInput = await prisma.event.create({
-                        data: {
-                                ownerUserId: userId,
-                                title: input.title,
-                                description: input.description,
-                                eventDate: input.eventDate ? new Date(input.eventDate) : null,
-                        },
-                });
-                redirect(`/events/${parsedInput.id}`);
+                const [insertedEvent] = await db.insert(eventsTable).values({
+                        ownerUserId: userId,
+                        title: input.title,
+                        description: input.description,
+                        eventDate: input.eventDate ? new Date(input.eventDate) : null,
+                        location: input.location,
+                }).returning({ id: eventsTable.id });
+
+                newEventId = insertedEvent?.id;
         } catch (err) {
                 console.log(err);
+                return; // Prevent redirecting on failure
         }
-
+        if (newEventId) {
+                redirect(`/events/${newEventId}`);
+        }
 }
-
