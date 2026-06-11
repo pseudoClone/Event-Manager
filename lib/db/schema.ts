@@ -37,7 +37,7 @@ export const eventRSVPs = pgTable("EventRSVP", {
 ]);
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
-        invite: one(eventInvites, { fields: [events.id], references: [eventInvites.eventId] }),
+        invite: one(eventInvites),
         eventRSVPs: many(eventRSVPs),
 }));
 
