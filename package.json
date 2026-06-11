@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "drizzle generate"
+    "postinstall": "drizzle-kit generate"
   },
   "dependencies": {
     "@neondatabase/auth": "^0.4.2-beta",
