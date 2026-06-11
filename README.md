@@ -1,7 +1,10 @@
 # Guide
 
-<img src="./gh-static/home.png" width="500"/>
-<img src="./gh-static/rsvp.png" width="500"/>
+## Home 
+<img src="./gh-static/home.png" width="800"/>
+
+## RSVP
+<img src="./gh-static/rsvp.png" width="800"/>
 
 1. Clone the project `git clone https://github.com/pseudoClone/Event-Manager.git`
 2. Run `npm install`. Make sure you have `npm` installed.
