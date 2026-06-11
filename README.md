@@ -3,7 +3,7 @@
 ## Home 
 <img src="./gh-static/home.png" width="800"/>
 
-## RSVP
+## RSVP List
 <img src="./gh-static/rsvp.png" width="800"/>
 
 1. Clone the project `git clone https://github.com/pseudoClone/Event-Manager.git`
