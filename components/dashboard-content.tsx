@@ -8,7 +8,7 @@ import { Badge } from "./ui/badge";
 
 export type RSVPStatus = typeof rsvpStatusEnum.enumValues[number];
 
-function countByStatus(rsvps: { status: RSVPStatus }[]) {
+export function countByStatus(rsvps: { status: RSVPStatus }[]) {
         let goingCount = 0;
         let maybeCount = 0;
         let notGoingCount = 0;
