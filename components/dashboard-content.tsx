@@ -1,28 +1,55 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { db } from "@/lib/db";
-import { events as eventsTable } from "@/lib/db/schema";
+import { events as eventsTable, rsvpStatusEnum } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 
+export type RSVPStatus = typeof rsvpStatusEnum.enumValues[number];
+
+function countByStatus(rsvps: { status: RSVPStatus }[]) {
+        let goingCount = 0;
+        let maybeCount = 0;
+        let notGoingCount = 0;
+
+        for (const r of rsvps) {
+                if (r.status === "GOING") {
+                        goingCount++;
+                } else if (r.status === "NOT_GOING") {
+                        notGoingCount++;
+                } else if (r.status === "UNSURE") {
+                        maybeCount++;
+                }
+        }
+        return { goingCount, maybeCount, notGoingCount };
+}
+
 export default async function DashboardContent({ userId }: { userId: string }) {
-        const rows = await db
-                .select({
-                        id: eventsTable.id,
-                        title: eventsTable.title,
-                        eventDate: eventsTable.eventDate,
-                        location: eventsTable.location,
-                })
-                .from(eventsTable)
-                .where(eq(eventsTable.ownerUserId, userId))
-                .orderBy(desc(eventsTable.createdAt));
+        const rows = await db.query.events.findMany({
+                where: (events, { eq }) => eq(events.ownerUserId, userId),
+                orderBy: (events, { desc }) => [desc(events.createdAt)],
+                columns: {
+                        id: true,
+                        title: true,
+                        eventDate: true,
+                        location: true,
+                },
+                with: {
+                        eventRSVPs: {
+                                columns: {
+                                        status: true,
+                                },
+                        },
+                },
+        });
 
         const events = rows.map((e) => ({
                 id: e.id,
                 title: e.title,
                 eventDate: e.eventDate ? e.eventDate.toISOString() : null,
                 location: e.location,
+                ...countByStatus(e.eventRSVPs),
         }));
 
         return (
@@ -60,9 +87,9 @@ export default async function DashboardContent({ userId }: { userId: string }) {
                                                                         </Button>
                                                                 </div>
                                                                 <div>
-                                                                        <Badge variant={"secondary"} />
-                                                                        <Badge variant={"secondary"} />
-                                                                        <Badge variant={"secondary"} />
+                                                                        <Badge variant={"secondary"} >Going: {event.goingCount}</Badge>
+                                                                        <Badge variant={"secondary"} >Not sure: {event.maybeCount}</Badge>
+                                                                        <Badge variant={"secondary"} >Not going: {event.notGoingCount}</Badge>
                                                                 </div>
                                                                 <div className="text-sm">
                                                                         {
