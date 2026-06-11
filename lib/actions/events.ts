@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "../auth/server";
 import { db } from "../db";
-import { events as eventsTable } from "../db/schema";
+import { eventInvites, events as eventsTable } from "../db/schema";
 
 function parseCreateEvent(formData: FormData) {
         const title = String(formData.get("title") ?? "").trim();
@@ -22,7 +22,7 @@ function parseCreateEvent(formData: FormData) {
         }
 }
 
-export default async function createEventAction(formData: FormData) {
+export async function createEventAction(formData: FormData) {
         const session = await getSession();
         const userId = session.data?.user.id;
         if (!userId) {
@@ -48,4 +48,43 @@ export default async function createEventAction(formData: FormData) {
         if (newEventId) {
                 redirect(`/events/${newEventId}`);
         }
+}
+
+export async function createInviteLinkAction(eventId: string) {
+        const session = await getSession();
+        const userId = session.data?.user.id;
+        if (!userId) {
+                throw new Error("Unauthorized");
+        }
+
+        const owns = await db.query.events.findFirst({
+                where: (events, { eq, and }) =>
+                        and(
+                                eq(events.id, eventId),
+                                eq(events.ownerUserId, userId)
+                        ),
+                columns: {
+                        id: true,
+                },
+        });
+
+        if (!owns) {
+                throw new Error("Event not found!");
+        }
+
+        const token = crypto.randomUUID().replace(/-/g, "");
+        await db
+                .insert(eventInvites)
+                .values({
+                        id: crypto.randomUUID(),
+                        eventId,
+                        token,
+                })
+                .onConflictDoUpdate({
+                        target: eventInvites.eventId,
+                        set: {
+                                token,
+                        },
+                });
+        return token;
 }
