@@ -4,8 +4,11 @@ import { countByStatus } from "./dashboard-content";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { createInviteLinkAction } from "@/lib/actions/events";
+import { eventRSVPs } from "@/lib/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 
 export async function EventDetailContent({ userId, eventId, }: { userId: string; eventId: string }) {
     const row = await db.query.events.findFirst({
@@ -50,6 +53,23 @@ export async function EventDetailContent({ userId, eventId, }: { userId: string;
         notGoingCount: counts.notGoingCount,
     }
 
+    const rsvpRows = await db.select({
+        id: eventRSVPs.id,
+        name: eventRSVPs.name,
+        email: eventRSVPs.email,
+        status: eventRSVPs.status,
+        respondedAt: eventRSVPs.respondedAt
+    }).from(eventRSVPs).where(eq(eventRSVPs.eventId, eventId)).orderBy(desc(eventRSVPs.respondedAt));
+
+
+    const rsvps = rsvpRows.map((r) => ({
+        id: r.id,
+        name: r.name,
+        email: r.email,
+        status: r.status,
+        respondedAt: r.respondedAt.toISOString(),
+    }));
+
     const createInviteActionForEvent = createInviteLinkAction.bind(
         null,
         event.id,
@@ -86,20 +106,66 @@ export async function EventDetailContent({ userId, eventId, }: { userId: string;
                 <CardContent className="space-y-4">
                     <p className="text-muted-foreground text-sm">Share this link for guests to RSVP without an account!</p>
 
-                                        {
-                                                inviteUrl ?
-                                                        (
-                                                                <div className="rounded-md border border-border p-3 text-sm">
-                                                                        {inviteUrl}
-                                                                </div>
-                                                        ) :
-                                                        <p>No invite links generated</p>
-                                        }
-                                        <form action={createInviteActionForEvent}>
-                                                <Button type="submit">Generate Link</Button>
-                                        </form>
-                                </CardContent>
-                        </Card>
-                </div>
-        );
+                    {
+                        inviteUrl ?
+                            (
+                                <div className="rounded-md border border-border p-3 text-sm">
+                                    {inviteUrl}
+                                </div>
+                            ) :
+                            <p>No invite links generated</p>
+                    }
+                    <form action={createInviteActionForEvent}>
+                        <Button type="submit">Generate Link</Button>
+                    </form>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>
+                        Attendees
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {
+                        rsvps.length === 0
+                            ?
+                            (<p className="text-sm text-muted-foreground">No responses yet</p>)
+                            :
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Updated</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {rsvps.map((rsvp) => (
+                                        <TableRow>
+                                            <TableCell>{rsvp.name}</TableCell>
+                                            <TableCell>{rsvp.email}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={"secondary"}>
+                                                    {rsvp.status === "NOT_GOING" ? "Not Going" : rsvp.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="flex item-center gap-2">
+                                                <span className="text-muted-foreground">
+                                                    {new Date(rsvp.respondedAt).toLocaleDateString()}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    {new Date(rsvp.respondedAt).toLocaleTimeString()}
+                                                </span>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                    }
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
