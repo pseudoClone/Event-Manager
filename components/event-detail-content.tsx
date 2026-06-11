@@ -115,7 +115,11 @@ export async function EventDetailContent({ userId, eventId, }: { userId: string;
                             ) :
                             <p>No invite links generated</p>
                     }
-                    <form action={createInviteActionForEvent}>
+                    <form
+                        action={async (formData) => {
+                            await createInviteActionForEvent();
+                        }}
+                    >
                         <Button type="submit">Generate Link</Button>
                     </form>
                 </CardContent>
