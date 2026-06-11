@@ -22,7 +22,7 @@ export const eventInvites = pgTable("EventInvite", {
 });
 
 export const eventRSVPs = pgTable("EventRSVP", {
-        id: uuid("id").primaryKey().defaultRandom(),
+        id: uuid("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
         eventId: uuid("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
         inviteId: uuid("invite_id").references(() => eventInvites.id, { onDelete: "set null" }),
         name: text("name").notNull(),
