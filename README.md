@@ -1,5 +1,8 @@
 # Guide
 
+<img src="./gh-static/home.png" width="500"/>
+<img src="./gh-static/rsvp.png" width="500"/>
+
 1. Clone the project `git clone https://github.com/pseudoClone/Event-Manager.git`
 2. Run `npm install`. Make sure you have `npm` installed.
 3. Prepare your database(if you are feeling lucky, try a self hosted database and not Neon).
